@@ -1,25 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { getUsers, deleteUser } from "./UserListApi";
 import {
-  Container,
+  Box,
+  Typography,
+  TextField,
+  Avatar,
+  Stack,
   Card,
   CardContent,
-  Typography,
-  Avatar,
-  TextField,
-  Chip,
-  Stack,
+  IconButton,
   CircularProgress,
   Alert,
-  Button,
-  Divider,
-  IconButton,
+  Grid,
+  Chip,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  Button,
   Slide,
-  Box,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -33,10 +32,16 @@ const RoleChip = ({ role }) => {
     Admin: "error",
     User: "primary",
     Saler: "success",
-    default: "default",
   };
-
-  return <Chip label={role || "N/A"} color={colorMap[role] || "default"} size="small" variant="outlined" />;
+  return (
+    <Chip
+      label={role || "N/A"}
+      color={colorMap[role] || "default"}
+      size="small"
+      variant="filled"
+      sx={{ fontSize: "0.75rem", fontWeight: 600 }}
+    />
+  );
 };
 
 const UserList = () => {
@@ -55,12 +60,11 @@ const UserList = () => {
         const data = await getUsers();
         setUsers(data);
       } catch (err) {
-        setError("Error fetching users: " + err.message);
+        setError("An error occurred while fetching users.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchUsers();
   }, []);
 
@@ -71,146 +75,143 @@ const UserList = () => {
   };
 
   const handleUserClick = (user) => {
-    openDialog("User Details", `👤 Name: ${user.firstName} ${user.lastName}\n👥 Username: ${user.userName}\n📧 Email: ${user.email}\n🔑 Role: ${user.role || "N/A"}`);
+    openDialog(
+      "User Details",
+      `👤 ${user.firstName} ${user.lastName}\n📧 ${user.email}\n🔑 Role: ${user.role || "N/A"}`
+    );
   };
 
   const handleDeleteUser = async () => {
     try {
       await deleteUser(confirmDelete.userId);
-      setUsers((prev) => prev.filter((user) => user.id !== confirmDelete.userId));
-      openDialog("Success", "✅ User deleted successfully.");
+      setUsers((prev) => prev.filter((u) => u.id !== confirmDelete.userId));
+      openDialog("Success", "✅ User has been deleted.");
     } catch (err) {
-      openDialog("Error", "❌ Failed to delete user: " + err.message);
+      openDialog("Error", "❌ Failed to delete user.");
     } finally {
       setConfirmDelete({ open: false, userId: null });
     }
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-  };
-
-  const filteredUsers = users.filter((user) =>
-    `${user?.firstName ?? ""} ${user?.lastName ?? ""} ${user?.userName ?? ""}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter((u) =>
+    `${u.firstName} ${u.lastName} ${u.userName}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) return <CircularProgress sx={{ display: "block", m: "auto", mt: 10 }} />;
+  if (loading) return <CircularProgress sx={{ display: "block", mt: 10, mx: "auto" }} />;
   if (error) return <Alert severity="error">{error}</Alert>;
 
   return (
-    <Container maxWidth="md" sx={{ py: 5 }}>
-      <Typography variant="h4" fontWeight={700} textAlign="center" gutterBottom>
+    <Box sx={{ py: 4, px: 2 }}>
+      <Typography variant="h4" fontWeight="bold" textAlign="center" mb={3}>
         👥 User Directory
       </Typography>
 
-      <Box sx={{ maxHeight: '75vh', overflowY: 'auto', p: 1, border: '1px solid #ddd', borderRadius: 2 }}>
-        <TextField
-          label="Search by name or username"
-          variant="outlined"
-          fullWidth
-          sx={{ mb: 3 }}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <TextField
+        label="🔍 Search users..."
+        variant="outlined"
+        fullWidth
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        sx={{ mb: 4, borderRadius: 2 }}
+      />
 
-        <Stack spacing={2}>
-          {filteredUsers.length === 0 ? (
-            <Typography textAlign="center" color="text.secondary">
-              No users found.
-            </Typography>
-          ) : (
-            filteredUsers.map((user) => (
-              <Card
-                key={user.id}
-                variant="outlined"
-                sx={{ position: "relative", cursor: "pointer", '&:hover': { boxShadow: 4, transform: "scale(1.02)" }, transition: "0.3s" }}
-                onClick={() => handleUserClick(user)}
+      <Grid container spacing={3}>
+        {filteredUsers.map((user) => (
+          <Grid item xs={12} sm={6} md={4} key={user.id}>
+            <Card
+              onClick={() => handleUserClick(user)}
+              sx={{
+                p: 2,
+                borderRadius: 4,
+                transition: "0.3s",
+                boxShadow: 3,
+                "&:hover": {
+                  boxShadow: 6,
+                  transform: "translateY(-4px)",
+                },
+                cursor: "pointer",
+                position: "relative",
+              }}
+            >
+              <IconButton
+                sx={{ position: "absolute", top: 10, right: 10 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConfirmDelete({ open: true, userId: user.id });
+                }}
               >
-                <IconButton
-                  size="small"
-                  sx={{ position: "absolute", top: 8, right: 8 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setConfirmDelete({ open: true, userId: user.id });
-                  }}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
 
-                <CardContent>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar
-                      alt={`${user.firstName} ${user.lastName}`}
-                      src={`https://i.pravatar.cc/150?u=${user.id}`}
-                      sx={{ width: 60, height: 60, border: "2px solid #1976d2" }}
-                    />
-                    <Stack spacing={0.5}>
-                      <Typography variant="h6" fontWeight={600}>@{user.userName}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {user.firstName} {user.lastName}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {user.email}
-                      </Typography>
-                      <RoleChip role={user.role} />
-                    </Stack>
-                  </Stack>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </Stack>
-      </Box>
-
-      <Divider sx={{ my: 4 }} />
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <Avatar
+                  src={`https://i.pravatar.cc/150?u=${user.id}`}
+                  sx={{ width: 60, height: 60 }}
+                />
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    @{user.userName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {user.firstName} {user.lastName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {user.email}
+                  </Typography>
+                  <RoleChip role={user.role} />
+                </Box>
+              </Stack>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
 
       <Button
         variant="contained"
         size="large"
         startIcon={<InfoOutlinedIcon />}
-        onClick={() => openDialog("Info", "🚀 Add new user functionality coming soon!")}
-        sx={{ display: "block", mx: "auto", borderRadius: 3, textTransform: "none", px: 4, py: 1.5 }}
+        sx={{ mt: 5, display: "block", mx: "auto", borderRadius: 3, px: 4, py: 1.5 }}
+        onClick={() =>
+          openDialog("Info", "🛠️ The add new user feature is coming soon!")
+        }
       >
-        Add New User
+        ➕ Add New User
       </Button>
 
+      {/* Info Dialog */}
       <Dialog
         open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
         TransitionComponent={Transition}
-        keepMounted
-        onClose={handleCloseDialog}
       >
         <DialogTitle>{dialogTitle}</DialogTitle>
         <DialogContent>
-          <Typography variant="body1" sx={{ whiteSpace: "pre-line", mt: 1 }}>
-            {dialogMessage}
-          </Typography>
+          <Typography sx={{ whiteSpace: "pre-line", mt: 1 }}>{dialogMessage}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} variant="contained" color="primary">
-            Close
-          </Button>
+          <Button onClick={() => setDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
 
+      {/* Confirm Delete Dialog */}
       <Dialog
         open={confirmDelete.open}
         onClose={() => setConfirmDelete({ open: false, userId: null })}
       >
-        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogTitle>Delete Confirmation</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete this user? This action cannot be undone.</Typography>
+          Are you sure you want to delete this user? This action cannot be undone.
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmDelete({ open: false, userId: null })}>Cancel</Button>
+          <Button onClick={() => setConfirmDelete({ open: false, userId: null })}>
+            Cancel
+          </Button>
           <Button onClick={handleDeleteUser} variant="contained" color="error">
             Delete
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </Box>
   );
 };
 

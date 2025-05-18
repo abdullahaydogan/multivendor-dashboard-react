@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getProductById, deleteProduct } from "../ProductApiServices";
+import { getProductById, deleteProduct } from "../../ProductApiServices";
 import {
   Container,
   Card,
@@ -32,7 +32,7 @@ const StyledCard = styled(Card)({
   overflow: "hidden",
   transition: "transform 0.3s ease",
   "&:hover": {
-    transform: "scale(1.05)",
+    transform: "scale(1.02)",
   },
 });
 
@@ -60,7 +60,7 @@ const ProductDescription = styled(Typography)({
 const ProductInfo = styled(Typography)({
   fontSize: "1.1rem",
   color: "#444",
-  fontWeight: "500",
+  fontWeight: 500,
   marginBottom: "8px",
 });
 
@@ -69,11 +69,12 @@ const ActionButtons = styled(Box)({
   justifyContent: "space-between",
   marginTop: "24px",
   padding: "0 16px 16px 16px",
+  gap: "16px",
 });
 
 const ButtonStyled = styled(Button)({
   fontSize: "1rem",
-  fontWeight: "500",
+  fontWeight: 500,
   textTransform: "none",
   padding: "10px 20px",
   borderRadius: "8px",
@@ -117,9 +118,16 @@ const ProductDetail = () => {
     }
   };
 
-  if (loading) return <CircularProgress sx={{ display: "block", margin: "auto" }} />;
-  if (error) return <Alert severity="error">Error: {error}</Alert>;
-  if (!product) return <p className="not-found">Product not found.</p>;
+  const handleEdit = () => {
+    navigate(`/products/edit/${id}`);
+  };
+
+  if (loading)
+    return <CircularProgress sx={{ display: "block", margin: "auto", mt: 10 }} />;
+  if (error)
+    return <Alert severity="error" sx={{ maxWidth: 600, mx: "auto", mt: 5 }}>{error}</Alert>;
+  if (!product)
+    return <Typography align="center">Product not found.</Typography>;
 
   return (
     <StyledContainer>
@@ -133,14 +141,33 @@ const ProductDetail = () => {
         )}
         <CardContent>
           <ProductTitle>{product.name}</ProductTitle>
-          <ProductDescription>{product.description || "No description available."}</ProductDescription>
-          <ProductInfo><strong>Stock:</strong> {product.stock}</ProductInfo>
-          <ProductInfo><strong>Price:</strong> ${product.price.toFixed(2)}</ProductInfo>
-          <ProductInfo><strong>Category:</strong> {product.category}</ProductInfo>
+          <ProductDescription>
+            {product.description || "No description available."}
+          </ProductDescription>
+          <ProductInfo>
+            <strong>Stock:</strong> {product.stock}
+          </ProductInfo>
+          <ProductInfo>
+            <strong>Price:</strong> ${product.price.toFixed(2)}
+          </ProductInfo>
+          <ProductInfo>
+            <strong>Category:</strong> {product.category}
+          </ProductInfo>
         </CardContent>
         <ActionButtons>
-         
-          <ButtonStyled variant="outlined" color="secondary" onClick={handleDelete}>
+          <ButtonStyled
+            variant="contained"
+            color="primary"
+            onClick={handleEdit}
+          >
+            Edit
+          </ButtonStyled>
+
+          <ButtonStyled
+            variant="outlined"
+            color="secondary"
+            onClick={handleDelete}
+          >
             Delete
           </ButtonStyled>
         </ActionButtons>

@@ -52,9 +52,9 @@ const CategoryDistribution = () => {
   if (error) return <Alert severity="error">{error}</Alert>;
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 } }}>
+    <Box sx={{ width: '100%', p: 2 }}>
       <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom>
-        📊 Ürün Dağılım Paneli
+        📊 Category Distribution Panel
       </Typography>
 
       <Grid container spacing={4}>

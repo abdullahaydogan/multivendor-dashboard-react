@@ -78,11 +78,11 @@ const Navbar = () => {
         <MenuItem onClick={() => handleNavigation("/")}>
           <HomeIcon sx={{ mr: 1 }} /> Home
         </MenuItem>
-        <MenuItem onClick={() => handleNavigation("/add-products")}>
+        <MenuItem onClick={() => handleNavigation("/products/create")}>
           <AddBoxIcon sx={{ mr: 1 }} /> Add Products
         </MenuItem>
         <MenuItem onClick={() => handleNavigation("/productList")}>
-          <InventoryIcon sx={{ mr: 1 }} /> My Products
+          <InventoryIcon sx={{ mr: 1 }} /> Products
         </MenuItem>
         <MenuItem onClick={() => handleNavigation("/userList")}>
           <PeopleIcon sx={{ mr: 1 }} /> User List
